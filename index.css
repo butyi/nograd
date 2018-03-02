@@ -1,0 +1,109 @@
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  background-color: lightgray;
+}
+p{
+  margin: 0.5em 0 0 0;
+  padding: 0;
+}
+* {
+  box-sizing:border-box;
+}
+.title{
+  background-color:#F2F2F2;
+}
+h2{
+  background-color:#F2F2F2;
+  margin: 0.5em;
+}
+h3{
+  margin: 0.5em;
+}
+.lower{
+  margin-top: 0;
+}
+.temp {
+  font-size : 150%;
+  font-weight : bold;
+  clear: both;
+}
+#decBtn, #incBtn {
+  font-size:300%;
+  padding-bottom:0.1em;
+}
+.center {
+  width:6cm;
+  margin: 0 auto;
+}
+.btn {
+  float:left;
+  width:2.5cm;
+  height:2.5cm;
+  background-color: gray;
+  color: black;
+  border: 2px solid black;
+  font-size : 130%;
+  font-size: 1.2em;
+  font-weight : bold;
+  margin: 0.25cm;
+  cursor: pointer;
+  border-radius: 20%;
+  text-align: center;
+}
+.box1 {
+  float:left;
+  width:33%;
+  padding:0.1em;
+}
+.box2 {
+  float:left;
+  width:33%;
+  padding:0.1em;
+}
+.box3 {
+  float:left;
+  width:33%;
+  padding:0.1em;
+}
+.footer {
+  text-align:center;
+  padding:0.5em;
+  font-size:0.6em;
+}
+.login {
+  margin:0.5em;
+  padding:0.5em;
+}
+.text {
+  text-align: justify;
+  padding:0.8em;
+}
+
+table {
+  width:100%;
+}
+
+table p {
+  margin: 0;
+}
+
+@media only screen and (max-width:800px) {
+  /* For tablets */
+  .box1 {
+    width:50%;
+  }
+  .box2 {
+    width:50%;
+  }
+  .box3 {
+    width:100%;
+  }
+}
+@media only screen and (max-width:500px) {
+  /* For mobile phones */
+  .box1, .box2, .box3 {
+    width:100%;
+  }
+}
+
