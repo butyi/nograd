@@ -23,8 +23,8 @@ if( isset($_POST['login']) ){//if there is filled in login form
 //calculate variable which shows the access level
 $authorized = ( ( isset( $_SESSION['authorized'] ) && $_SESSION['authorized'] == true ) ||
                 ( isset( $_COOKIE['authorized'] ) && $_COOKIE['authorized'] == true ) );
-if( $_SERVER['REMOTE_ADDR'] != "192.168.0.1" )$authorized=true; //allow access for local users
 include("lib.php");
+if( clientInSameSubnet() )$authorized=true; //allow access for local users
 $ft_per_sec = $ft_per_kwh * $kw / 60. / 60.;
 ?>
 <!DOCTYPE html>
@@ -162,7 +162,7 @@ function AjaxWrite(parname,parvalue){//initiate the write new value procedure
   xmlhttp.send(par);
   document.getElementById('decBtn').disable = true;//do not play with buttons during writing 
   document.getElementById('incBtn').disable = true;//do not play with buttons during writing
-  document.getElementById('TempDemand').style.color='grey';//gray font color during write procedure 
+  document.getElementById('TempDemand').style.color='lightgray';//lightgray font color during write procedure 
   writetimeout_timer=16;//set write timeout
 }
 
@@ -171,7 +171,7 @@ function UpdateBtnColor(btnid,value){
     document.getElementById(btnid).style.backgroundColor = 'yellow';
   }
   if(value=='Ki'){
-    document.getElementById(btnid).style.backgroundColor = 'gray';
+    document.getElementById(btnid).style.backgroundColor = 'lightgray';
   }
 }        
 

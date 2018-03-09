@@ -175,7 +175,31 @@ function GetTimeLengthOfName($name,$timelength){
 }
 
 
-
+/**
+* Check if a client IP is in our Server subnet
+* @return boolean
+*/
+function clientInSameSubnet(){
+    $client_ip = $_SERVER['REMOTE_ADDR'];
+    $server_ip = $_SERVER['SERVER_ADDR'];
+    // Extract broadcast and netmask from ifconfig
+    $out = trim(shell_exec("/sbin/ifconfig"));
+    // This is because the php.net comment function does not
+    // allow long lines.
+    $match  = "/^.*".$server_ip;
+    $match .= ".*Bcast:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*";
+    $match .= "Mask:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/im";
+    if (!preg_match($match,$out,$regs)){
+      file_put_contents("clientInSameSubnet.txt","2:'$out'");
+      return false;
+    }
+    $bcast = ip2long($regs[1]);
+    $smask = ip2long($regs[2]);
+    $ipadr = ip2long($client_ip);
+    $nmask = $bcast & $smask;
+    file_put_contents("clientInSameSubnet.txt","0");
+    return (($ipadr & $smask) == ($nmask & $smask));
+}
 
 
 
