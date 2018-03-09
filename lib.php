@@ -190,14 +190,12 @@ function clientInSameSubnet(){
     $match .= ".*Bcast:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*";
     $match .= "Mask:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/im";
     if (!preg_match($match,$out,$regs)){
-      file_put_contents("clientInSameSubnet.txt","2:'$out'");
       return false;
     }
     $bcast = ip2long($regs[1]);
     $smask = ip2long($regs[2]);
     $ipadr = ip2long($client_ip);
     $nmask = $bcast & $smask;
-    file_put_contents("clientInSameSubnet.txt","0");
     return (($ipadr & $smask) == ($nmask & $smask));
 }
 
