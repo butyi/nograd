@@ -25,7 +25,6 @@ $authorized = ( ( isset( $_SESSION['authorized'] ) && $_SESSION['authorized'] ==
                 ( isset( $_COOKIE['authorized'] ) && $_COOKIE['authorized'] == true ) );
 include("lib.php");
 if( clientInSameSubnet() )$authorized=true; //allow access for local users
-$ft_per_sec = $ft_per_kwh * $kw / 60. / 60.;
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">

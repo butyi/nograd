@@ -25,8 +25,22 @@ function GetValueOf($name,$orderby="time",$dir="DESC",$rettype="value",$timelimi
       } else {
         die( "Valami baj van az adatbazissal. (fetch_array)" );
       }
+    } else if(0==$result->num_rows){//there was no record in the last time period at all 
+      //search last record without time limit, because, in the time period, this is the min and also max value.  
+      $sql="SELECT * FROM history WHERE name = '".$name."' ORDER BY id LIMIT 1";
+      if($result = $mysqli->query($sql)){
+        if(1==$result->num_rows){
+          if( $value_obj = $result->fetch_array(MYSQLI_ASSOC) ){
+            $ret = $value_obj[$rettype];
+          } else {
+            die( "Valami baj van az adatbazissal. (fetch_array)" );
+          }
+        } else {
+          die( "Valami baj van az adatbazissal. query($sql), num_rows != 1, but ".$result->num_rows );
+        }
+      }  
     } else {
-      die( "Valami baj van az adatbazissal. (num_rows != 1)" );
+      die( "Valami baj van az adatbazissal. query($sql), num_rows != 1, but ".$result->num_rows );
     }
   } else {
     die( "Valami baj van az adatbazissal. query($sql)" );
@@ -138,6 +152,10 @@ function GetTimeLengthOfName($name,$timelength){
   $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
   $sql="SELECT * FROM history WHERE name = '".$name."' AND time > DATE_SUB( NOW( ) , INTERVAL ".$timelength." ) ORDER BY time DESC";
 
+  //default value, if there is no record in the time period at all
+  $prev_item["value"]=0;
+  $prev_item["time"]=date("Y-m-d H:m:s",time());
+  
   $on_time_sec = 0;
   if(!$mysqli->connect_errno){
     $result = $mysqli->query($sql);
