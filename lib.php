@@ -187,8 +187,8 @@ function GetTimeLengthOfName($name,$timelength){
   $ft_per_sec = $ft_per_kwh * $load_powers[$name] / 60. / 60.;
   $ft = (float)$on_time_sec * $ft_per_sec;
   if(0<$ft && $ft<=1)$ft=1;// below 1 Ft, it is 1 Ft
-  if(1<$ft && $ft<1000)$ft=intval($ft); //between 1Ft and 1000Ft, only integer is printed 
-  if(1000<=$ft && $ft<1)$ft=intval($ft/1000)."e"; //over 1000Ft, it is 1eFt
+  if(1<$ft && $ft<10000)$ft=intval($ft); //between 1Ft and 10.000Ft, only integer is printed 
+  if(10000<=$ft)$ft=intval($ft/1000)."e"; //over 10.000Ft, it is 10eFt
   return array("time"=>get_date_diff_human(0, $on_time_sec),"price"=>$ft );
 }
 
