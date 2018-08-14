@@ -39,7 +39,7 @@ if( clientInSameSubnet() )$authorized=true; //allow access for local users
 var key=<?php echo GetAjaxKey(); ?>;//key for ajax requests
 var writedelay_timer=0;//to not write first change, wait for user to set the final value, and write when user seems finished the change
 var update_timer=2;//update page every 1 min (if it is in focus)
-var writetimeout_timer=0;//timeout function to close not successful write attempt  
+var writetimeout_timer=0;//timeout function to close not successful write attempt
 var tem_timerid;//Timed Error Message timer
 var room_temp_demand;//the variable what is displayed and changed by user
 var old_room_temp_demand;//value before change to apply relative limit
@@ -85,13 +85,13 @@ function every_sec(){
 
 function inc_room_temp_demand(){
   if(30<(room_temp_demand+1)){
-    TimedErrorMessage('Absolute maximum is 30 &deg;C',5000); 
+    TimedErrorMessage('Absolute maximum is 30 &deg;C',5000);
     return;//absolute limit
   }
   disableUpdate=true;
   update_timer=0;//stop periodical update during change
   room_temp_demand++;
-  document.getElementById('TempDemand').style.fontWeight = 'normal'; 
+  document.getElementById('TempDemand').style.fontWeight = 'normal';
   document.getElementById('TempDemand').innerHTML=room_temp_demand;
   document.getElementById('ErrorMessage').style.display = 'none';//no error
   writedelay_timer=3;
@@ -99,13 +99,13 @@ function inc_room_temp_demand(){
 
 function dec_room_temp_demand(){
   if((room_temp_demand-1)<0){
-    TimedErrorMessage('Absolute minimum is 0 &deg;C',5000); 
+    TimedErrorMessage('Absolute minimum is 0 &deg;C',5000);
     return;//absolute limit
   }
   disableUpdate=true;
   update_timer=0;//stop periodical update during change
   room_temp_demand--;
-  document.getElementById('TempDemand').style.fontWeight = 'normal'; 
+  document.getElementById('TempDemand').style.fontWeight = 'normal';
   document.getElementById('TempDemand').innerHTML=room_temp_demand;
   document.getElementById('ErrorMessage').style.display = 'none';//no error
   writedelay_timer=3;
@@ -120,15 +120,15 @@ function TimedErrorMessage(message,time){//this informs the user about any error
 
 function FinishWrite(success){//finalize the write new value procedure
   disableUpdate=false;//write finished, enable update again
-  document.getElementById('TempDemand').style.fontWeight = 'bold'; 
+  document.getElementById('TempDemand').style.fontWeight = 'bold';
   update_timer=2;//restart periodical update
-  document.getElementById('decBtn').disable = false;//button can be used again 
+  document.getElementById('decBtn').disable = false;//button can be used again
   document.getElementById('incBtn').disable = false;//button can be used again
   document.getElementById('TempDemand').style.color='black';
   if(success==false){
     room_temp_demand = old_room_temp_demand;//restore original value
     document.getElementById('TempDemand').innerHTML=room_temp_demand;
-    TimedErrorMessage('Write was not successfull.',5000); 
+    TimedErrorMessage('Write was not successfull.',5000);
   } else {
     old_room_temp_demand = room_temp_demand;//update the new value (already before updatepage())
   }
@@ -159,24 +159,24 @@ function AjaxWrite(parname,parvalue){//initiate the write new value procedure
   xmlhttp.open('POST','ajax_write.php',true);
   xmlhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
   xmlhttp.send(par);
-  document.getElementById('decBtn').disable = true;//do not play with buttons during writing 
+  document.getElementById('decBtn').disable = true;//do not play with buttons during writing
   document.getElementById('incBtn').disable = true;//do not play with buttons during writing
-  document.getElementById('TempDemand').style.color='lightgray';//lightgray font color during write procedure 
+  document.getElementById('TempDemand').style.color='lightgray';//lightgray font color during write procedure
   writetimeout_timer=16;//set write timeout
 }
 
-function UpdateBtnColor(btnid,value){        
+function UpdateBtnColor(btnid,value){
   if(value=='Be'){
     document.getElementById(btnid).style.backgroundColor = 'yellow';
   }
   if(value=='Ki'){
     document.getElementById(btnid).style.backgroundColor = 'lightgray';
   }
-}        
+}
 
 function updatepage(){//read fresh values from server
   var xmlhttp;
-  if(disableUpdate)return;//do not update while write is in progress 
+  if(disableUpdate)return;//do not update while write is in progress
 
   if(window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
     xmlhttp=new XMLHttpRequest();
@@ -231,7 +231,7 @@ function Pulse(port,btnid){
 
   xmlhttp.onreadystatechange=function(){
     if(xmlhttp.readyState==4){
-      document.getElementById(btnid).disable = false;//from now on can be pushed again 
+      document.getElementById(btnid).disable = false;//from now on can be pushed again
       updatepage();
     }
   }
@@ -239,7 +239,7 @@ function Pulse(port,btnid){
   xmlhttp.open('POST','pulse.php',true);
   xmlhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
   xmlhttp.send(par);
-  document.getElementById(btnid).disable = true;//do not play with buttons during writing 
+  document.getElementById(btnid).disable = true;//do not play with buttons during writing
 }
 
 
@@ -278,7 +278,7 @@ function Pulse(port,btnid){
 <?php if(!$authorized){ ?>
   <div class="box1">
 <?php } ?>
-  
+
 <?php if(!$authorized){ ?>
     <h2>Hőmérséklet most</h2>
 <?php } ?>
@@ -296,14 +296,14 @@ function Pulse(port,btnid){
 <?php if($authorized){ ?>
     <span id="ErrorMessage"></span>
     <br/>
-    <span class="temp">Bent:</span> 
-    <span class="temp" id="InTemp"><?php echo round(GetValueOf("real_in_temp")/1000,1); ?></span> <span class="temp">&deg;C</span>
+    <span class="temp">Bent:</span>
+    <span class="temp" id="InTemp"><?php $val=GetValueOf("real_in_temp","time","DESC","value","1 DAY",true); if(is_numeric($val))echo round($val/1000,1); else echo $val; ?></span> <span class="temp">&deg;C</span>
 <?php } ?>
     <br/>
 <?php if($authorized){ ?>
-      <span class="temp">Kint:</span> 
+      <span class="temp">Kint:</span>
 <?php } ?>
-      <span class="temp" id="OutTemp"><?php echo round(GetValueOf("real_out_temp")/1000,1); ?></span> <span class="temp">&deg;C</span>
+      <span class="temp" id="OutTemp"><?php $val=GetValueOf("real_out_temp","time","DESC","value","1 DAY",true); if(is_numeric($val))echo round($val/1000,1); else echo $val; ?></span> <span class="temp">&deg;C</span>
 <?php if($authorized){ ?>
     <br/>
     <span class="temp">Fűtés:</span> <span class="temp" id="HeaterState"><?php echo (GetValueOf("room_heater_state") ? "Be" : "Ki"); ?></span>
@@ -415,14 +415,14 @@ function Pulse(port,btnid){
   <div class="box3">
     <h2>Jó, de mi ez?</h2>
     <p class="text">
-      Ez az oldal a felhasználói felülete egy épületfelügyeleti rendszernek, ami <a href="https://www.google.hu/maps/place/N%C3%B3gr%C3%A1d,+2642/@47.9007942,19.0103268,13z/data=!3m1!4b1!4m5!3m4!1s0x476a8492a3c17dcf:0x400c4290c1e52f0!8m2!3d47.9041031!4d19.0498504?dcr=0" target="_blank">Nógrádon</a> az Almáskert egyik házában üzemel. 
+      Ez az oldal a felhasználói felülete egy épületfelügyeleti rendszernek, ami <a href="https://www.google.hu/maps/place/N%C3%B3gr%C3%A1d,+2642/@47.9007942,19.0103268,13z/data=!3m1!4b1!4m5!3m4!1s0x476a8492a3c17dcf:0x400c4290c1e52f0!8m2!3d47.9041031!4d19.0498504?dcr=0" target="_blank">Nógrádon</a> az Almáskert egyik házában üzemel.
       Egy <a href="https://hu.wikipedia.org/wiki/Raspberry_Pi" target="_blank">Raspberry Pi</a> <a href="https://www.raspbian.org/" target="_blank">Raspbian</a> linux-al méri két DS18B20 érzékelővel a külső és belső hőmérsékletet és vezérli a ház fűtését. A felület a <a href="https://freedns.afraid.org/" target="_blank">Free DNS</a> segítségével érhető el bárhonnan.
       <br/>Jogosult felhasználó ezen felületen távolról ellenőrizheti és állíthatja a kívánt belső hőmérsékletet. Továbbá a ház világításait is tudja innen vezérelni.
       <br/>A többiekkel a felület megosztja az aktuális külső hőmérsékletet és annak az elmult fél évi rekordjait, hátha hasznát veszik az almáskerti lakosok.
     </p>
   </div>
 <?php } ?>
-  
+
 </div>
 <div class="footer">
   <p>(c) <a href="http://butyi.hu/" target="_blank">Bütyi</a></p>

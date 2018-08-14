@@ -8,8 +8,18 @@ include("/home/pi/passcheck.php");
 if(isset($_POST["key"]) && KeyValid($_POST["key"])){
   $ret="";
   $ret.=GetValueOf("room_temp_demand")."|";
-  $ret.=round(GetValueOf("real_in_temp")/1000,1)."|";
-  $ret.=round(GetValueOf("real_out_temp")/1000,1)."|";
+  $val = GetValueOf("real_in_temp","time","DESC","value","1 DAY",true);
+  if(is_numeric($val)){
+    $ret.=round($val/1000,1)."|";
+  } else {
+    $ret.=$val."|";
+  }
+  $val = GetValueOf("real_out_temp","time","DESC","value","1 DAY",true);
+  if(is_numeric($val)){
+    $ret.=round($val/1000,1)."|";
+  } else {
+    $ret.=$val."|";
+  }
   $ret.=(GetValueOf("room_heater_state") ? "Be" : "Ki")."|";
   $ret.=(GetValueOf("kitchen_lamp_state") ? "Be" : "Ki")."|";
   $ret.=(GetValueOf("room_lamp_state") ? "Be" : "Ki")."|";

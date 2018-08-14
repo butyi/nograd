@@ -1,12 +1,12 @@
 <?php
 
 
-function GetValueOf($name,$orderby="time",$dir="DESC",$rettype="value",$timelimit=""){//ASC=min, DESC=max
+function GetValueOf($name,$orderby="time",$dir="DESC",$rettype="value",$timelimit="",$strict=false){//ASC=min, DESC=max
   include "/home/pi/config.php";
   $ret=0;
 
   $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
-  if($mysqli->connect_errno)die( "Valami baj van az adatbazissal (new mysqli)." ); 
+  if($mysqli->connect_errno)die( "Valami baj van az adatbazissal (new mysqli)." );
 
   $orderbypattern="".$orderby." $dir";
   if($orderby==="value")$orderbypattern="cast(".$orderby." as signed) $dir";
@@ -17,7 +17,7 @@ function GetValueOf($name,$orderby="time",$dir="DESC",$rettype="value",$timelimi
   $sql="SELECT * FROM history WHERE name = '".$name."' $timelimittxt ORDER BY $orderbypattern LIMIT 1";
   //file_put_contents("sql.txt",$sql."\r\n",FILE_APPEND);
   //echo "<p>".$sql."<p>";
-  
+
   if($result = $mysqli->query($sql)){
     if(1==$result->num_rows){
       if( $value_obj = $result->fetch_array(MYSQLI_ASSOC) ){
@@ -25,20 +25,24 @@ function GetValueOf($name,$orderby="time",$dir="DESC",$rettype="value",$timelimi
       } else {
         die( "Valami baj van az adatbazissal. (fetch_array)" );
       }
-    } else if(0==$result->num_rows){//there was no record in the last time period at all 
-      //search last record without time limit, because, in the time period, this is the min and also max value.  
-      $sql="SELECT * FROM history WHERE name = '".$name."' ORDER BY id LIMIT 1";
-      if($result = $mysqli->query($sql)){
-        if(1==$result->num_rows){
-          if( $value_obj = $result->fetch_array(MYSQLI_ASSOC) ){
-            $ret = $value_obj[$rettype];
+    } else if(0==$result->num_rows){//there was no record in the last time period at all
+      if(strict){
+        $ret = "-";//no data
+      } else {
+        //search last record without time limit, because, in the time period, this is the min and also max value.
+        $sql="SELECT * FROM history WHERE name = '".$name."' ORDER BY id LIMIT 1";
+        if($result = $mysqli->query($sql)){
+          if(1==$result->num_rows){
+            if( $value_obj = $result->fetch_array(MYSQLI_ASSOC) ){
+              $ret = $value_obj[$rettype];
+            } else {
+              die( "Valami baj van az adatbazissal. (fetch_array)" );
+            }
           } else {
-            die( "Valami baj van az adatbazissal. (fetch_array)" );
+            die( "Valami baj van az adatbazissal. query($sql), num_rows != 1, but ".$result->num_rows );
           }
-        } else {
-          die( "Valami baj van az adatbazissal. query($sql), num_rows != 1, but ".$result->num_rows );
         }
-      }  
+      }
     } else {
       die( "Valami baj van az adatbazissal. query($sql), num_rows != 1, but ".$result->num_rows );
     }
@@ -54,14 +58,14 @@ function NewValueOf($name,$newvalue,$min=false,$max=false){
   if( is_numeric($max) && $max<intval($newvalue) )return;//too high, do not store
 
   $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
-  if($mysqli->connect_errno)die( "Valami baj van az adatbazissal (new mysqli)." ); 
+  if($mysqli->connect_errno)die( "Valami baj van az adatbazissal (new mysqli)." );
 
   //parameter to be written only if value is different from the current (latest) value
   if(GetValueOf($name) == $newvalue)return false;
 
-  $sql = 'INSERT INTO `'.$dbname.'`.`history` (`id`, `name`, `value`, `time`) VALUES (NULL, \''.$name.'\', \''.$newvalue.'\', NOW());'; 
+  $sql = 'INSERT INTO `'.$dbname.'`.`history` (`id`, `name`, `value`, `time`) VALUES (NULL, \''.$name.'\', \''.$newvalue.'\', NOW());';
   //echo "<p>".$sql."<p>";
-  
+
   if($result = $mysqli->query($sql)){
     return true;
   } else {
@@ -79,20 +83,20 @@ function NewValueOf($name,$newvalue,$min=false,$max=false){
  * - with precision = 1 : 3 days
  * - with precision = 2 : 3 days, 4 hours
  * - with precision = 3 : 3 days, 4 hours, 12 minutes
- * 
+ *
  * From: http://www.if-not-true-then-false.com/2010/php-calculate-real-differences-between-two-dates-or-timestamps/
  *
  * @param mixed $time1 a time (string or timestamp)
  * @param mixed $time2 a time (string or timestamp)
  * @return string time difference
- * 
+ *
  * Usage:
  *  $t  = '2013-12-29T00:43:11+00:00';
  *  $t2 = '2013-11-24 19:53:04 +0100';
  *  var_dump( get_date_diff_human( $t, $t2, 1 ) ); // string '1 month' (length=7)
  *  var_dump( get_date_diff_human( $t, $t2, 2 ) ); // string '1 month, 4 days' (length=15)
  *  var_dump( get_date_diff_human( $t, $t2, 3 ) ); // string '1 month, 4 days, 5 hours' (length=24)
- * 
+ *
  */
 function get_date_diff_human( $time1, $time2 ) {
 	global $intervals_hu;

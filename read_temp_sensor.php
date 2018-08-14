@@ -60,7 +60,7 @@ function UpdateTemp($sensor_id,$name){
     if(500 < $diff){//if change is larger than ...
       NewValueOf($name,$newval);
       echo ", Write $name = $newval";
-    }  
+    }
   }
   return $newval;
 }
