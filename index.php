@@ -280,7 +280,7 @@ function Pulse(port,btnid){
 <?php } ?>
 
 <?php if(!$authorized){ ?>
-    <h2>Hőmérséklet most</h2>
+    <h2>Hőmérséklet most</h2>( <?php echo date("Y.m.d H:i",time()); ?> )
 <?php } ?>
 <?php if($authorized){ ?>
     <h2>Fűtésvezérlés</h2>
