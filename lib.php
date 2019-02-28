@@ -26,7 +26,7 @@ function GetValueOf($name,$orderby="time",$dir="DESC",$rettype="value",$timelimi
         die( "Valami baj van az adatbazissal. (fetch_array)" );
       }
     } else if(0==$result->num_rows){//there was no record in the last time period at all
-      if(strict){
+      if($strict){
         $ret = "-";//no data
       } else {
         //search last record without time limit, because, in the time period, this is the min and also max value.
