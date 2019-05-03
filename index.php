@@ -262,10 +262,10 @@ function Pulse(port,btnid){
   <div class="box1">
     <h2>Világításvezérlés</h2>
     <div class="center">
-    <button onclick="Pulse(7,'KitchenBtn')" id="KitchenBtn" class="btn">Konyha</button>
-    <button onclick="Pulse(6,'RoomBtn')" id="RoomBtn" class="btn">Szoba</button>
-    <button onclick="Pulse(5,'ShowerBtn')" id="ShowerBtn" class="btn">Fürdő</button>
-    <button onclick="Pulse(4,'TerraceBtn')" id="TerraceBtn" class="btn">Terasz</button>
+    <button onclick="Pulse(3,'KitchenBtn')" id="KitchenBtn" class="btn">Konyha</button>
+    <button onclick="Pulse(2,'RoomBtn')" id="RoomBtn" class="btn">Szoba</button>
+    <button onclick="Pulse(1,'ShowerBtn')" id="ShowerBtn" class="btn">Fürdő</button>
+    <button onclick="Pulse(0,'TerraceBtn')" id="TerraceBtn" class="btn">Terasz</button>
     </div>
   </div>
 <?php } ?>
