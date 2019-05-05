@@ -29,21 +29,25 @@ UpdateTemp($sensor_id_in,"real_in_temp");
 $room_temp_demand = GetValueOf("room_temp_demand")*1000;
 $real_in_temp = GetValueOf("real_in_temp");
 if($real_in_temp < $room_temp_demand){
-  SwitchHeater(4,1);
+  //set output bit
+  SharedMemory(
+    $SHARED_MEMORY_KEY, //My mem key
+    $SEMAPHORE_KEY_HEAT, //Semaphore key
+    "w", //read and write
+    0, //don't care
+    0, //don't care
+    "HeaterSet_MyMemory"
+  );
 } else {
-  SwitchHeater(4,0);
-}
-
-//read heater state from i2c
-$call="/usr/sbin/i2cget -y 0 0x20 0x13";//get all 8 bits
-unset($ret);
-exec($call,$ret);
-$byte=hexdec(substr($ret[0],2));
-$byte &= 0x10;//mask out other bits
-if($byte){
-  NewValueOf("room_heater_state",1);//On
-} else {
-  NewValueOf("room_heater_state",0);//Off
+  //clear output bit
+  SharedMemory(
+    $SHARED_MEMORY_KEY, //My mem key
+    $SEMAPHORE_KEY_HEAT, //Semaphore key
+    "w", //read and write
+    0, //don't care
+    0, //don't care
+    "HeaterClear_MyMemory"
+  );
 }
 
 echo "\r\n";
@@ -93,35 +97,17 @@ function ReadTemp($sensor_id){
 }
 
 
-
-function SwitchHeater($port,$state){
-    //calculate address and bitmask
-    $port_bit= 1 << intval($port);
-    $address_dir=0x00;
-    $address_latch=0x14;
-
-    //set all 8 bits as output
-    $call="/usr/sbin/i2cset -y 0 0x20 0x".sprintf("%02X",$address_dir)." 0x00";
-    //$debug= "call: '$call'";
-    exec($call);
-
-    //read latch register current state
-    $call="/usr/sbin/i2cget -y 0 0x20 0x".sprintf("%02X",$address_latch);
-    //$debug= "call: '$call'";
-    unset($ret);
-    exec($call,$ret);
-    $byte=hexdec(substr($ret[0],2));
-
-    //modify the bit and write
-    if($state){
-      $byte |= $port_bit;//set
-    } else {
-      $byte &= ~$port_bit;//clear
-    }
-    $call="/usr/sbin/i2cset -y 0 0x20 0x".sprintf("%02X",$address_latch)." 0x".sprintf("%02X",$byte);
-    //$debug= "call: '$call'";
-    exec($call);
+function HeaterSet_MyMemory($shared_memory_array){
+  $shared_memory_array[0] |= 0x10;
+  return $shared_memory_array;//give back the modified array
 }
+
+function HeaterClear_MyMemory($shared_memory_array){
+  $shared_memory_array[0] &= ~0x10;
+  return $shared_memory_array;//give back the modified array
+}
+
+
 
 
 

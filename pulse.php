@@ -10,37 +10,30 @@ if( isset($_POST["key"]) && KeyValid($_POST["key"]) && isset($_POST['port']) )
 {
   $port = $_POST["port"];
   if(0<=$port && $port<=3){
-    //calculate address and bitmask
     $port_bit= 1 << intval($port);
-    $address_dir=0x00;
-    $address_latch=0x14;
 
-    //set all 8 bits as output
-    $call="/usr/sbin/i2cset -y 0 0x20 0x".sprintf("%02X",$address_dir)." 0x00";
-    //$debug= "call: '$call'";
-    exec($call);
-
-    //read latch register current state
-    $call="/usr/sbin/i2cget -y 0 0x20 0x".sprintf("%02X",$address_latch);
-    //$debug= "call: '$call'";
-    unset($ret);
-    exec($call,$ret);
-    $byte=hexdec(substr($ret[0],2));
-
-    //set the bit and write
-    $byte |= $port_bit;
-    $call="/usr/sbin/i2cset -y 0 0x20 0x".sprintf("%02X",$address_latch)." 0x".sprintf("%02X",$byte);
-    //$debug= "call: '$call'";
-    exec($call);
+    //set bit
+    SharedMemory(
+      $SHARED_MEMORY_KEY, //My mem key
+      $SEMAPHORE_KEY_BTN, //Semaphore key
+      "w", //read and write
+      0, //don't care
+      0, //don't care
+      "PulseSet_MyMemory" //set bit defined by $port_bit
+    );
 
     //wait pulse lenght
-    usleep ( 3000*1000 );
+    usleep ( 500*1000 );
 
-    //clear the bit and write
-    $byte &= ~$port_bit;
-    $call="/usr/sbin/i2cset -y 0 0x20 0x".sprintf("%02X",$address_latch)." 0x".sprintf("%02X",$byte);
-    //$debug= "call: '$call'";
-    exec($call);
+    //clear bit
+    SharedMemory(
+      $SHARED_MEMORY_KEY, //My mem key
+      $SEMAPHORE_KEY_BTN, //Semaphore key
+      "w", //read and write
+      0, //don't care
+      0, //don't care
+      "PulseClear_MyMemory" //set bit defined by $port_bit
+    );
 
     http_response_code(200);//OK
   } else {
@@ -50,9 +43,18 @@ if( isset($_POST["key"]) && KeyValid($_POST["key"]) && isset($_POST['port']) )
   http_response_code(401);//Unauthorized
 }
 
-//file_put_contents("_POST.arr",$debug);
 
+function PulseSet_MyMemory($shared_memory_array){
+  global $port_bit;
+  $shared_memory_array[0] |= $port_bit;
+  return $shared_memory_array;//give back the modified array
+}
 
-//read: i2cget -y 1 0x20 0x12
+function PulseClear_MyMemory($shared_memory_array){
+  global $port_bit;
+  $shared_memory_array[0] &= $port_bit;
+  return $shared_memory_array;//give back the modified array
+}
+
 
 ?>

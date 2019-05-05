@@ -100,8 +100,7 @@ function NewValueOf($name,$newvalue,$min=false,$max=false){
  */
 function get_date_diff_human( $time1, $time2 ) {
 	global $intervals_hu;
-	// If not numeric then convert timestamps
-	if( !is_int( $time1 ) ) {
+	// If not numeric then convert timestamps	if( !is_int( $time1 ) ) {
 		$time1 = strtotime( $time1 );
 	}
 	if( !is_int( $time2 ) ) {
@@ -159,7 +158,7 @@ function GetTimeLengthOfName($name,$timelength){
   //default value, if there is no record in the time period at all
   $prev_item["value"]=0;
   $prev_item["time"]=date("Y-m-d H:m:s",time());
-  
+
   $on_time_sec = 0;
   if(!$mysqli->connect_errno){
     $result = $mysqli->query($sql);
@@ -186,12 +185,12 @@ function GetTimeLengthOfName($name,$timelength){
         }
         $prev_item=$item;
       }
-    }  
+    }
   }
   $ft_per_sec = $ft_per_kwh * $load_powers[$name] / 60. / 60.;
   $ft = (float)$on_time_sec * $ft_per_sec;
   if(0<$ft && $ft<=1)$ft=1;// below 1 Ft, it is 1 Ft
-  if(1<$ft && $ft<10000)$ft=intval($ft); //between 1Ft and 10.000Ft, only integer is printed 
+  if(1<$ft && $ft<10000)$ft=intval($ft); //between 1Ft and 10.000Ft, only integer is printed
   if(10000<=$ft)$ft=intval($ft/1000)."e"; //over 10.000Ft, it is 10eFt
   return array("time"=>get_date_diff_human(0, $on_time_sec),"price"=>$ft );
 }
@@ -219,6 +218,81 @@ function clientInSameSubnet(){
     $ipadr = ip2long($client_ip);
     $nmask = $bcast & $smask;
     return (($ipadr & $smask) == ($nmask & $smask));
+}
+
+
+//Access shared memory. reserve, read, write
+function SharedMemory(
+    int $mem_key, //Memory key
+    int $sem_key, //Semaphore key
+    string $flags, //shmop_open flags
+    int $mode, //shmop_open mode
+    int $size, //shmop_open size (0 open or higher to create)
+    callable $callback //callback function for the body to do with the memory
+  )
+{
+
+  //Create the semaphore
+  $semaphore_id = sem_get($sem_key, 1); //Creates, or gets if already present, a semaphore
+  if($semaphore_id === false){
+    return "Failed to create semaphore. Reason: $php_errormsg\r\n";
+  }
+
+  //Acquire the semaphore
+  if(!sem_acquire($semaphore_id)){ //If not available this will stall until the semaphore is released by the other process
+    sem_remove($semaphore_id); //Use even if we didn't create the semaphore as something has gone wrong and its usually debugging so lets no lock up this semaphore key
+    return "Failed to acquire semaphore $semaphore_id\r\n";
+  }
+
+  //We have exclusive access to the shared memory (the other process is unable to aquire the semaphore until we release it)
+
+  //Setup access to the shared memory
+  $shared_memory_id = shmop_open($mem_key, $flags, $mode, $size);	//Shared memory key, flags, permissions, size (permissions & size are 0 to open an existing memory segment)
+																																//flags: "a" open an existing shared memory segment for read only, "w" read and write to a shared memory segment
+  if(empty($shared_memory_id)){
+  	return "Failed to open shared memory.\r\n";			//<<<< THIS WILL HAPPEN IF APPLICATION HASN'T CREATED THE SHARED MEMORY OR IF IT HAS BEEN SHUTDOWN AND DELETED THE SHARED MEMORY
+  }
+
+	//--------------------------------------------
+	//----- READ AND WRITE THE SHARED MEMORY -----
+	//--------------------------------------------
+  {
+    //have the size if it was not passed in the parameter
+    if($size==0){
+      $size=shmop_size($shared_memory_id);
+    }
+
+    //read the memory
+    $shared_memory_string = shmop_read($shared_memory_id, 0, $size); //Shared memory ID, Start Index, Number of bytes to read
+    if($shared_memory_string === false){
+      sem_release($semaphore_id);
+      return "Failed to read shared memory";
+    }
+
+	  //convert to array bytes
+	  $shared_memory_array = array_slice(unpack('C*', "\0".$shared_memory_string), 1); //C* means unsigned char for all bytes
+
+    //call the callback function to do changes on memory bytes
+    if($callback!==null){
+      $shared_memory_array = $callback($shared_memory_array);
+    }
+
+    //convert the array of byte values back to a byte string
+    $shared_memory_string = call_user_func_array("pack", array_merge(array("C*"), $shared_memory_array));
+
+    //write back the new memory content
+    shmop_write($shared_memory_id, $shared_memory_string, 0); //Shared memory id, string to write, Index to start writing from
+                                                            //Note that a trailing null 0x00 byte is not written, just the byte values / characters
+	  //Detach from the shared memory (close file)
+	  shmop_close($shared_memory_id);
+  }
+
+  //Release the semaphore
+  if(!sem_release($semaphore_id)){ //Must be called after sem_acquire() so that another process can acquire the semaphore
+    return "Failed to release $semaphore_id semaphore\r\n";
+  }
+
+  return true;
 }
 
 
