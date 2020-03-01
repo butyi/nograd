@@ -153,15 +153,15 @@ In worst case, I can call the neighbor to step to my house and I can tell him wh
   `dtparam=i2c_arm=on`
 - Run `sudo i2cdetect -y 0`
   If board is pőroperly available, you should see this:
-     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
-10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-20: 20 21 -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-70: -- -- -- -- -- -- -- --
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --  
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  
+20: 20 21 -- -- -- -- -- -- -- -- -- -- -- -- -- --  
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  
+70: -- -- -- -- -- -- -- --  
 - Run `sudo usermod -a -G i2c www-data` to have apache access to i2c
 - Run `sudo systemctl restart apache2` to restart apache
 - [Install LAMP](https://pchelp.ricmedia.com/setup-lamp-server-raspberry-pi-3-complete-diy-guide/3/)
