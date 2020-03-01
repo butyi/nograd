@@ -4,9 +4,13 @@
 // This is responsible to read temp sensors.
 // It is needed every 1-5 minutes.
 // To be called by crontab.
+//   crontab -e
+//     add this line to read temp every minute:
+//   "* * * * * php /var/www/html/read_temp_sensor.php >> ~/read_temp_sensor.log"
 // ----------------------------------------------------------------------------------
 
 date_default_timezone_set('UTC');
+include("/home/pi/config.php");
 include("lib.php");
 
 // ----------------------------------------------------------------------------------
@@ -14,7 +18,6 @@ include("lib.php");
 // ----------------------------------------------------------------------------------
 $sensor_id_out = "28-041721c5faff";
 $sensor_id_in =  "28-041721d908ff";
-
 
 
 // ----------------------------------------------------------------------------------
