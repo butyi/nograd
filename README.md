@@ -162,16 +162,25 @@ In worst case, I can call the neighbor to step to my house and I can tell him wh
 50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  
 60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --  
 70: -- -- -- -- -- -- -- --  
-- Run `sudo usermod -a -G i2c www-data` to have apache access to i2c
 - Run `sudo systemctl restart apache2` to restart apache
 - [Install LAMP](https://pchelp.ricmedia.com/setup-lamp-server-raspberry-pi-3-complete-diy-guide/3/)
+- Create RAM disk
+  - Run `cd /`
+  - Run `sudo mkdir ram`
+  - Run `sudo nano /etc/fstab`
+  - Add line `tmpfs /ram tmpfs nodev,nosuid,size=10M 0 0` and save
+  - Run `sudo mount -a` for re-mount drives
+  - Run `df` for check if RAM drive is mounted correctly. If mounted, you will see a line like `tmpfs             10240       0   10240   0% /ram`
+  - Test if `/ram` folder is really stored in RAM. Save a file here (`nano test.txt`) reboot and check folder. Proper if folder is empty after reboot.
+  - Configure out.dat file into `/ram/out.dir` in config.php
 - Get my files from github (Run `git init` and `git clone http://github.com/butyi/nograd` copy them to /var/www/html)
 - Copy config.php and passcheck.php to /home/pi folder and update them with your specific content (database access, real passcheck algorithm). These files are just empty templates on GitHub.
 - [Install FreeDNS](https://thelastmaimou.wordpress.com/2014/03/23/find-pi-everywhere-freedns-a-free-dynamic-dns-service/)
 - Setup MySQL database. If you cannot log in see [this](https://askubuntu.com/questions/763336/cannot-enter-phpmyadmin-as-root-mysql-5-7)
 - Import index.sql by phpmyadmin.
-- Run `crontab -e` and add line `* * * * * php /var/www/html/read_temp_sensor.php >> ~/read_temp_sensor.log` to automatic read temperatures.
-- Run `crontab -e` and add line `@reboot php /var/www/html/readdigin.php &` to handle relays.
+- Run `crontab -e` and 
+  - add line `* * * * * php /var/www/html/read_temp_sensor.php >> ~/read_temp_sensor.log` to automatic read temperatures.
+  - add line `@reboot php /var/www/html/readdigin.php &` to handle relays.
 - Reboot Raspberry: `sudo reboot`
 - Turn off Raspberry: `sudo shutdown -h now`
 

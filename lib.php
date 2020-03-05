@@ -254,38 +254,38 @@ function SharedMemory(
     return "Failed to open shared memory.\r\n";			//<<<< THIS WILL HAPPEN IF APPLICATION HASN'T CREATED THE SHARED MEMORY OR IF IT HAS BEEN SHUTDOWN AND DELETED THE SHARED MEMORY
   }
 
-  //--------------------------------------------
-  //----- READ AND WRITE THE SHARED MEMORY -----
-  //--------------------------------------------
+    //--------------------------------------------
+    //----- READ AND WRITE THE SHARED MEMORY -----
+    //--------------------------------------------
 
-  //have the size if it was not passed in the parameter
-  if($size==0){
-    $size=shmop_size($shared_memory_id);
-  }
+    //have the size if it was not passed in the parameter
+    if($size==0){
+      $size=shmop_size($shared_memory_id);
+    }
 
-  //read the memory
-  $shared_memory_string = shmop_read($shared_memory_id, 0, $size); //Shared memory ID, Start Index, Number of bytes to read
-  if($shared_memory_string === false){
-    sem_release($semaphore_id);
-    return "Failed to read shared memory";
-  }
+    //read the memory
+    $shared_memory_string = shmop_read($shared_memory_id, 0, $size); //Shared memory ID, Start Index, Number of bytes to read
+    if($shared_memory_string === false){
+      sem_release($semaphore_id);
+      return "Failed to read shared memory";
+    }
 
-  //convert to array bytes
-  $shared_memory_array = array_slice(unpack('C*', "\0".$shared_memory_string), 1); //C* means unsigned char for all bytes
+    //convert to array bytes
+    $shared_memory_array = array_slice(unpack('C*', "\0".$shared_memory_string), 1); //C* means unsigned char for all bytes
 
-  //call the callback function to do changes on memory bytes
-  if($callback!==null){
-    $shared_memory_array = $callback($shared_memory_array);
-  }
+    //call the callback function to do changes on memory bytes
+    if($callback!==null){
+      $shared_memory_array = $callback($shared_memory_array);
+    }
 
-  //convert the array of byte values back to a byte string
-  $shared_memory_string = call_user_func_array("pack", array_merge(array("C*"), $shared_memory_array));
+    //convert the array of byte values back to a byte string
+    $shared_memory_string = call_user_func_array("pack", array_merge(array("C*"), $shared_memory_array));
 
-  //write back the new memory content
-  shmop_write($shared_memory_id, $shared_memory_string, 0); //Shared memory id, string to write, Index to start writing from
+    //write back the new memory content
+    shmop_write($shared_memory_id, $shared_memory_string, 0); //Shared memory id, string to write, Index to start writing from
                                                             //Note that a trailing null 0x00 byte is not written, just the byte values / characters
-  //Detach from the shared memory (close file)
-  shmop_close($shared_memory_id);
+    //Detach from the shared memory (close file)
+    shmop_close($shared_memory_id);
 
 
   //Release the semaphore

@@ -4,9 +4,6 @@
 // This is responsible to read temp sensors.
 // It is needed every 1-5 minutes.
 // To be called by crontab.
-//   crontab -e
-//     add this line to read temp every minute:
-//   "* * * * * php /var/www/html/read_temp_sensor.php >> ~/read_temp_sensor.log"
 // ----------------------------------------------------------------------------------
 
 date_default_timezone_set('UTC');
@@ -20,6 +17,7 @@ $sensor_id_out = "28-041721c5faff";
 $sensor_id_in =  "28-041721d908ff";
 
 
+
 // ----------------------------------------------------------------------------------
 // Main
 // ----------------------------------------------------------------------------------
@@ -31,6 +29,7 @@ UpdateTemp($sensor_id_in,"real_in_temp");
 
 $room_temp_demand = GetValueOf("room_temp_demand")*1000;
 $real_in_temp = GetValueOf("real_in_temp");
+/*
 if($real_in_temp < $room_temp_demand){
   //set output bit
   SharedMemory(
@@ -54,7 +53,7 @@ if($real_in_temp < $room_temp_demand){
 }
 
 echo "\r\n";
-
+*/
 
 
 
@@ -99,7 +98,7 @@ function ReadTemp($sensor_id){
   return false;
 }
 
-
+/*
 function HeaterSet_MyMemory($shared_memory_array){
   $shared_memory_array[0] |= 0x10;
   return $shared_memory_array;//give back the modified array
@@ -109,7 +108,7 @@ function HeaterClear_MyMemory($shared_memory_array){
   $shared_memory_array[0] &= ~0x10;
   return $shared_memory_array;//give back the modified array
 }
-
+*/
 
 
 

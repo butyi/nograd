@@ -4,10 +4,9 @@ include("lib.php");
 include("/home/pi/config.php");
 include("/home/pi/passcheck.php");
 
-
 if( isset($_POST["key"]) && KeyValid($_POST["key"]) && isset($_POST["port"])){//call from ajax
   $port = $_POST["port"];
-  //$logfile = "pulse.log";
+  $logfile = "pulse.log";
   if(isset($logfile))file_put_contents($logfile,print_r($_POST,true));
 } else if($argc==2){//call from command line
   $port = $argv[1];
@@ -26,53 +25,29 @@ if($port<0 || 3<$port){
 $port_bit= 1 << intval($port);
 
 //set bit
-$ret=SharedMemory(
-  $SHARED_MEMORY_KEY, //My mem key
-  $SEMAPHORE_KEY_BTN, //Semaphore key
-  "w", //read and write
-  0, //don't care
-  0, //don't care
-  "PulseSet_MyMemory" //set bit defined by $port_bit
-);
+$outdata=file_get_contents($out_dat);
+$byte=hexdec(substr($outdata,0,2));
 
-if($ret === true){
-  $ret="Set OK\r\n";
-}
+$byte |= $port_bit;
+$outdata = sprintf("%02X",$byte);
+$ret = "Pulse up: ".$outdata."\n";
+echo $ret;
+file_put_contents($out_dat,$outdata);
 if(isset($logfile))file_put_contents($logfile,$ret,FILE_APPEND);
 
-//wait pulse lenght 1s
-usleep ( 1000*1000 );
+//wait pulse lenght 250ms
+usleep ( 250*1000 );
 
 //clear bit
-$ret=SharedMemory(
-  $SHARED_MEMORY_KEY, //My mem key
-  $SEMAPHORE_KEY_BTN, //Semaphore key
-  "w", //read and write
-  0, //don't care
-  0, //don't care
-  "PulseClear_MyMemory" //set bit defined by $port_bit
-);
-
-if($ret === true){
-  $ret="Clear OK\r\n";
-}
+//$outdata=file_get_contents("out.dat");
+//$byte=hexdec(substr($outdata,0,2));
+$byte &= ~$port_bit;
+$outdata = sprintf("%02X",$byte);
+$ret = "Pulse up: ".$outdata."\n";
+echo $ret;
+file_put_contents($out_dat,$outdata);
 if(isset($logfile))file_put_contents($logfile,$ret,FILE_APPEND);
 
 http_response_code(200);//OK
-
-
-
-function PulseSet_MyMemory($shared_memory_array){
-  global $port_bit;
-  $shared_memory_array[0] |= $port_bit;
-  return $shared_memory_array;//give back the modified array
-}
-
-function PulseClear_MyMemory($shared_memory_array){
-  global $port_bit;
-  $shared_memory_array[0] &= ~$port_bit;
-  return $shared_memory_array;//give back the modified array
-}
-
 
 ?>
