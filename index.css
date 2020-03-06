@@ -10,6 +10,9 @@ p{
 * {
   box-sizing:border-box;
 }
+br{
+  line-height: 0px;
+}
 .title{
   background-color: lightgray;
 }
@@ -28,27 +31,29 @@ h3{
   font-weight : bold;
   clear: both;
 }
+
 #decBtn, #incBtn {
-  font-size:300%;
+  font-size: 200%;
   padding-bottom:0.1em;
 }
+
 .center {
   width:6cm;
   margin: 0 auto;
 }
+
 .btn {
   float:left;
   width:2.5cm;
   height:2.5cm;
   background-color: lightgray;
   color: black;
+  font-size: 130%;
   border: 2px solid black;
-  font-size : 130%;
-  font-size: 1.2em;
   font-weight : bold;
   margin: 0.25cm;
   cursor: pointer;
-  border-radius: 20%;
+  border-radius: 0.3cm;
   text-align: center;
 }
 .box1 {

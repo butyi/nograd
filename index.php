@@ -45,6 +45,7 @@ var room_temp_demand;//the variable what is displayed and changed by user
 var old_room_temp_demand;//value before change to apply relative limit
 var disableUpdate = false;//just a fleg for the named function
 var doc_was_focus = false;//previous state of hasFocus to detect the become focus event
+var lampbuttonstates = 0;//first four bits means current state of lamp buttons
 
 var everysec_timerid = setInterval('every_sec()', 1000);//to print out time of last update
 
@@ -166,10 +167,9 @@ function AjaxWrite(parname,parvalue){//initiate the write new value procedure
 }
 
 function UpdateBtnColor(btnid,value){
-  if(value=='Be'){
+  if(0<value){
     document.getElementById(btnid).style.backgroundColor = 'yellow';
-  }
-  if(value=='Ki'){
+  } else {
     document.getElementById(btnid).style.backgroundColor = 'lightgray';
   }
 }
@@ -196,10 +196,11 @@ function updatepage(){//read fresh values from server
         document.getElementById('InTemp').innerHTML=pars[1];
         document.getElementById('OutTemp').innerHTML=pars[2];
         document.getElementById('HeaterState').innerHTML=pars[3];
-        UpdateBtnColor('KitchenBtn',pars[4]);
-        UpdateBtnColor('RoomBtn',pars[5]);
-        UpdateBtnColor('ShowerBtn',pars[6]);
-        UpdateBtnColor('TerraceBtn',pars[7]);
+        lampbuttonstates = parseInt(pars[4]);
+        UpdateBtnColor('KitchenBtn',lampbuttonstates&1);
+        UpdateBtnColor('RoomBtn',lampbuttonstates&2);
+        UpdateBtnColor('ShowerBtn',lampbuttonstates&4);
+        UpdateBtnColor('TerraceBtn',lampbuttonstates&8);
       } else {
         document.getElementById('TempDemand').innerHTML='-';
         document.getElementById('InTemp').innerHTML='-';
@@ -215,7 +216,7 @@ function updatepage(){//read fresh values from server
 
   xmlhttp.open('POST','ajax_read.php',true);
   xmlhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
-  xmlhttp.send('key='+key);
+  xmlhttp.send('key='+key+'&prevval='+lampbuttonstates);
 }
 
 function Pulse(port,btnid){
@@ -285,16 +286,18 @@ function Pulse(port,btnid){
 <?php if($authorized){ ?>
     <h2>Fűtésvezérlés</h2>
     <div class="center">
-    <span class="temp">Cél:</span> <span class="temp" id="TempDemand"><?php echo GetValueOf("room_temp_demand"); ?></span> <span class="temp">&deg;C</span>
+    <span class="temp">Cél:</span>
+    <span class="temp" id="TempDemand"><?php echo GetValueOf("room_temp_demand"); ?></span>
+    <span class="temp">&deg;C</span>
     </div>
-    <div class="center">
+    <div style="height:3cm;width:6.3cm;" class="center">
     <button onclick="dec_room_temp_demand()" id="decBtn" class="btn">-</button>
     <button onclick="inc_room_temp_demand()" id="incBtn" class="btn">+</button>
     </div>
 <?php } ?>
     <div class="center">
 <?php if($authorized){ ?>
-    <span id="ErrorMessage"></span>
+    <span id="ErrorMessage" style="display:none;"></span>
     <br/>
     <span class="temp">Bent:</span>
     <span class="temp" id="InTemp"><?php $val=GetValueOf("real_in_temp","time","DESC","value","1 DAY",true); if(is_numeric($val))echo round($val/1000,1); else echo $val; ?></span> <span class="temp">&deg;C</span>
