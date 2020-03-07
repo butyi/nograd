@@ -62,18 +62,19 @@ Lamp states are read by a demon every 200ms, and also stores real value in MySQL
 New value is only stored in database, if it is changed meantime. Database structure is in index.sql.
 
 User interface is a simple responsive web page. 
-User action is handled by JavaScript, and sent to server by Ajax method when needed. 
-Normal user interface consist of index.php, index.css.
+User action is handled by JavaScript, and sent to server by Ajax method when needed.
+Ajax method waits on server side for input chage for a while (3s). If change happens meantime, it returns immediately. 
+This method speeds up response of digit inputs. User interface consist of index.php, index.css.
 
 User interface updates values automatically in every second. 
-This updates temperatures, heater state, and lamp states, and it is done by read from SQL database. 
+This updates temperatures, heater state, and lamp states, and it is done by read from MySQL database and RAM disk. 
 Statistic values are read only at page load, not every 1 sec, due to data usage and speed considerations.
 
 User action for temperature is stored in MySQL database only. Heater control runs in temperature read task. 
 
-User actions for lamps has immediate effect to make pulse by pulse.php.
+User actions for lamps has immediate effect to make pulse by pulse.php using RAM disk interface file.
 
-Interface between web page and hardware controller daemon is [shared memory](https://www.php.net/manual/en/book.shmop.php).
+Interface between web page and hardware controller daemon are files in RAM disk and MySQL database.
 
 Control is only available for authenticated users (RQ10). 
 
@@ -180,7 +181,7 @@ In worst case, I can call the neighbor to step to my house and I can tell him wh
 - Import index.sql by phpmyadmin.
 - Run `crontab -e` and 
   - add line `* * * * * php /var/www/html/read_temp_sensor.php >> ~/read_temp_sensor.log` to automatic read temperatures.
-  - add line `@reboot php /var/www/html/readdigin.php &` to handle relays.
+  - add line `@reboot php /var/www/html/i2c-task.php &` to handle relays.
 - Reboot Raspberry: `sudo reboot`
 - Turn off Raspberry: `sudo shutdown -h now`
 
