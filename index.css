@@ -26,6 +26,11 @@ h3{
 .lower{
   margin-top: 0;
 }
+.largetemp {
+  font-size : 400%;
+  font-weight : bold;
+  clear: both;
+}
 .temp {
   font-size : 150%;
   font-weight : bold;

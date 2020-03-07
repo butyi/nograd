@@ -9,15 +9,11 @@ include("/home/pi/config.php");
 include("lib.php");
 
 $logfile="/home/pi/readdigin.log";
-file_put_contents($logfile,"Demon readdigin started. ".date("Y.m.d H:i:s")."\r\n");
+file_put_contents($logfile,"Demon i2c-task started. ".date("Y.m.d H:i:s")."\r\n");
 
 //wait 30s to init mysql database
 usleep(30*1000*1000);
 file_put_contents($logfile,"Delay (30s) elapsed, I2C task is starting. ".date("Y.m.d H:i:s")."\r\n",FILE_APPEND);
-
-if(!file_exists($out_dat)){ //if file is not yet exists
-  file_put_contents($out_dat,"00");  //create it with off state outputs
-}
 
 //endless task: demon
 while(1){
@@ -35,24 +31,11 @@ while(1){
   unset($ret);
   exec($call,$ret);
   $inbyte=substr($ret[0],2);
-  file_put_contents($in_dat,$inbyte);  //create it with off state outputs
-  $inbyte=hexdec($inbyte);
-
-  foreach($digins as $digin){
-    if( $inbyte & (1<<$digin["bit"]) ){//real 1
-      if(GetValueOf($digin["dbname"])==0){//if 0 is stored
-        NewValueOf($digin["dbname"],1,0,1);//update it to 1
-      }
-    } else {//0
-      if(GetValueOf($digin["dbname"])!=0){//if 1 is stored
-        NewValueOf($digin["dbname"],0,0,1);//update it to 0
-      }
-    }
-  }
+  file_put_contents($in_dat,$inbyte);  //create it with off state outputs (these inputs)
 
   // -- OUTPUTS --
   //write output values to MCP23017 (always, even not changed)
-  $outdata="00";
+  $outdata="00";//default off is considered, while out_dat file is not yet created in RAM drive
   if(file_exists($out_dat)){ //if file is not yet exists
     $outdata=file_get_contents($out_dat);
   }

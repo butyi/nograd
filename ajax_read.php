@@ -1,6 +1,7 @@
 <?php
 
 include("lib.php");
+include("/home/pi/config.php");
 include("/home/pi/passcheck.php");
 
 //file_put_contents("POST.arr",print_r($_POST,true));
@@ -23,14 +24,11 @@ if(isset($_POST["key"]) && KeyValid($_POST["key"])){
   } else {
     $ret.=$val."|";
   }
-  $ret.=(GetValueOf("room_heater_state") ? "Be" : "Ki")."|";
-  $n = 20; //2s
+
+  $n = 30; //3s
   while($n--){//wait for state change
-    $lampbuttonstates = 0;
-    $lampbuttonstates|=(GetValueOf("kitchen_lamp_state") ? 1 : 0);
-    $lampbuttonstates|=(GetValueOf("room_lamp_state") ? 2 : 0);
-    $lampbuttonstates|=(GetValueOf("shower_lamp_state") ? 4 : 0);
-    $lampbuttonstates|=(GetValueOf("terrace_lamp_state") ? 8 : 0);
+    $lampbuttonstates = hexdec(file_get_contents($in_dat));
+    //file_put_contents(__FILE__.".log","$lampbuttonstates ? $prev_lampbuttonstates\n",FILE_APPEND);
     if($lampbuttonstates != $prev_lampbuttonstates)break; //answer immediately
     usleep(100 * 1000);//wait 100ms
   }

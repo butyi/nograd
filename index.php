@@ -43,9 +43,9 @@ var writetimeout_timer=0;//timeout function to close not successful write attemp
 var tem_timerid;//Timed Error Message timer
 var room_temp_demand;//the variable what is displayed and changed by user
 var old_room_temp_demand;//value before change to apply relative limit
-var disableUpdate = false;//just a fleg for the named function
+var disableUpdate = false;//just a flag for the named function
 var doc_was_focus = false;//previous state of hasFocus to detect the become focus event
-var lampbuttonstates = 0;//first four bits means current state of lamp buttons
+var diginstates = 0;//first four bits means current state of lamp buttons
 
 var everysec_timerid = setInterval('every_sec()', 1000);//to print out time of last update
 
@@ -166,11 +166,19 @@ function AjaxWrite(parname,parvalue){//initiate the write new value procedure
   writetimeout_timer=16;//set write timeout
 }
 
-function UpdateBtnColor(btnid,value){
+function UpdateObjectBoolColor(oid,value){
   if(0<value){
-    document.getElementById(btnid).style.backgroundColor = 'yellow';
+    document.getElementById(oid).style.backgroundColor = 'yellow';
   } else {
-    document.getElementById(btnid).style.backgroundColor = 'lightgray';
+    document.getElementById(oid).style.backgroundColor = 'lightgray';
+  }
+}
+
+function UpdateObjectBoolText(oid,value){
+  if(0<value){
+    document.getElementById(oid).innerHTML="Be";
+  } else {
+    document.getElementById(oid).innerHTML="Ki";
   }
 }
 
@@ -195,12 +203,12 @@ function updatepage(){//read fresh values from server
         document.getElementById('TempDemand').innerHTML=pars[0];
         document.getElementById('InTemp').innerHTML=pars[1];
         document.getElementById('OutTemp').innerHTML=pars[2];
-        document.getElementById('HeaterState').innerHTML=pars[3];
-        lampbuttonstates = parseInt(pars[4]);
-        UpdateBtnColor('KitchenBtn',lampbuttonstates&1);
-        UpdateBtnColor('RoomBtn',lampbuttonstates&2);
-        UpdateBtnColor('ShowerBtn',lampbuttonstates&4);
-        UpdateBtnColor('TerraceBtn',lampbuttonstates&8);
+        diginstates = parseInt(pars[3]);
+        UpdateObjectBoolColor('TerraceBtn',diginstates&0x01);
+        UpdateObjectBoolColor('ShowerBtn',diginstates&0x02);
+        UpdateObjectBoolColor('RoomBtn',diginstates&0x04);
+        UpdateObjectBoolColor('KitchenBtn',diginstates&0x08);
+        UpdateObjectBoolText('HeaterState',diginstates&0x10);
       } else {
         document.getElementById('TempDemand').innerHTML='-';
         document.getElementById('InTemp').innerHTML='-';
@@ -216,7 +224,7 @@ function updatepage(){//read fresh values from server
 
   xmlhttp.open('POST','ajax_read.php',true);
   xmlhttp.setRequestHeader('Content-type','application/x-www-form-urlencoded');
-  xmlhttp.send('key='+key+'&prevval='+lampbuttonstates);
+  xmlhttp.send('key='+key+'&prevval='+diginstates);
 }
 
 function Pulse(port,btnid){
@@ -306,7 +314,7 @@ function Pulse(port,btnid){
 <?php if($authorized){ ?>
       <span class="temp">Kint:</span>
 <?php } ?>
-      <span class="temp" id="OutTemp"><?php $val=GetValueOf("real_out_temp","time","DESC","value","1 DAY",true); if(is_numeric($val))echo round($val/1000,1); else echo $val; ?></span> <span class="temp">&deg;C</span>
+      <span class="<?php if(!$authorized)echo 'large'; ?>temp" id="OutTemp"><?php $val=GetValueOf("real_out_temp","time","DESC","value","1 DAY",true); if(is_numeric($val))echo round($val/1000,1); else echo $val; ?></span> <span class="<?php if(!$authorized)echo 'large'; ?>temp">&deg;C</span>
 <?php if($authorized){ ?>
     <br/>
     <span class="temp">Fűtés:</span> <span class="temp" id="HeaterState"><?php echo (GetValueOf("room_heater_state") ? "Be" : "Ki"); ?></span>
