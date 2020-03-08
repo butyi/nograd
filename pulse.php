@@ -6,7 +6,7 @@ include("/home/pi/passcheck.php");
 
 if( isset($_POST["key"]) && KeyValid($_POST["key"]) && isset($_POST["port"])){//call from ajax
   $port = $_POST["port"];
-  $logfile = "pulse.log";
+  //$logfile = "pulse.log";
   if(isset($logfile))file_put_contents($logfile,print_r($_POST,true));
 } else if($argc==2){//call from command line
   $port = $argv[1];
@@ -22,30 +22,17 @@ if($port<0 || 3<$port){
   exit;
 }
 
-$port_bit= 1 << intval($port);
-
 //set bit
-$outdata=file_get_contents($out_dat);
-$byte=hexdec(substr($outdata,0,2));
-
-$byte |= $port_bit;
-$outdata = sprintf("%02X",$byte);
-$ret = "Pulse up: ".$outdata."\n";
-echo $ret;
-file_put_contents($out_dat,$outdata);
+$ret = "Pulse up port ".$port.PHP_EOL;
+file_put_contents($out_dat.$port,'1');
 if(isset($logfile))file_put_contents($logfile,$ret,FILE_APPEND);
 
 //wait pulse lenght 250ms
 usleep ( 250*1000 );
 
 //clear bit
-//$outdata=file_get_contents("out.dat");
-//$byte=hexdec(substr($outdata,0,2));
-$byte &= ~$port_bit;
-$outdata = sprintf("%02X",$byte);
-$ret = "Pulse up: ".$outdata."\n";
-echo $ret;
-file_put_contents($out_dat,$outdata);
+$ret = "Pulse down port ".$port.PHP_EOL;
+file_put_contents($out_dat.$port,'0');
 if(isset($logfile))file_put_contents($logfile,$ret,FILE_APPEND);
 
 http_response_code(200);//OK

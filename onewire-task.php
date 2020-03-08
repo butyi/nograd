@@ -26,35 +26,22 @@ echo "Temp Sensors read at ".date("Y.m.d H:i:s",time());
 UpdateTemp($sensor_id_out,"real_out_temp");
 UpdateTemp($sensor_id_in,"real_in_temp");
 
-
 $room_temp_demand = GetValueOf("room_temp_demand")*1000;
 $real_in_temp = GetValueOf("real_in_temp");
-/*
+
 if($real_in_temp < $room_temp_demand){
-  //set output bit
-  SharedMemory(
-    $SHARED_MEMORY_KEY, //My mem key
-    $SEMAPHORE_KEY_HEAT, //Semaphore key
-    "w", //read and write
-    0, //don't care
-    0, //don't care
-    "HeaterSet_MyMemory"
-  );
+  //Switch on heater: set output bit
+  if(heater("1")){
+    echo " - Heater switched ON";
+  }
 } else {
-  //clear output bit
-  SharedMemory(
-    $SHARED_MEMORY_KEY, //My mem key
-    $SEMAPHORE_KEY_HEAT, //Semaphore key
-    "w", //read and write
-    0, //don't care
-    0, //don't care
-    "HeaterClear_MyMemory"
-  );
+  //Switch off heater: clear output bit
+  if(heater("0")){
+    echo " - Heater switched OFF";
+  }
 }
 
-echo "\r\n";
-*/
-
+echo PHP_EOL;
 
 
 // ----------------------------------------------------------------------------------
@@ -98,19 +85,24 @@ function ReadTemp($sensor_id){
   return false;
 }
 
-/*
-function HeaterSet_MyMemory($shared_memory_array){
-  $shared_memory_array[0] |= 0x10;
-  return $shared_memory_array;//give back the modified array
+//Apply heater state
+//  parameter is 1 byte long string. Either "0" or "1"
+//  only write file if state changes
+//  if file is not yet exists, force file write
+//  file content is also 1 byte long string. Either "0" or "1"
+//  return true if state was changed
+function heater($newstate){
+  $filepath = "/ram/out4";
+  $now = "X"; //force file write by default
+  if(file_exists($filepath)){//if file already exists
+    $now = substr(file_get_contents($filepath),0,1);//read current value
+  }
+  if($now != $newstate){//write file only if state changes
+    file_put_contents($filepath,$newstate);
+    return true;
+  }
+  return false;
 }
-
-function HeaterClear_MyMemory($shared_memory_array){
-  $shared_memory_array[0] &= ~0x10;
-  return $shared_memory_array;//give back the modified array
-}
-*/
-
-
 
 
 ?>
