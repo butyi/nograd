@@ -30,14 +30,13 @@ while(1){
   $call="/usr/sbin/i2cget -y 0 0x20 0x13";//get all 8 bits
   unset($ret);
   exec($call,$ret);
-  $inbyte=substr($ret[0],2);
-  file_put_contents($in_dat,$inbyte);  //create it with off state outputs (these inputs)
+  file_put_contents($in_dat,substr($ret[0],2,2));  //create it with off state outputs (these inputs)
 
   // -- OUTPUTS --
   //write output values to MCP23017 (always, even not changed)
   $outdata="00";//default off is considered, while out_dat file is not yet created in RAM drive
   if(file_exists($out_dat)){ //if file is not yet exists
-    $outdata=file_get_contents($out_dat);
+    $outdata=substr(file_get_contents($out_dat),0,2);
   }
   $call="/usr/sbin/i2cset -y 0 0x20 0x14 0x".substr($outdata,0,2);
   exec($call);

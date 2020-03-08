@@ -27,7 +27,10 @@ if(isset($_POST["key"]) && KeyValid($_POST["key"])){
 
   $n = 30; //3s
   while($n--){//wait for state change
-    $lampbuttonstates = hexdec(file_get_contents($in_dat));
+    $lampbuttonstates = 0;
+    if(file_exists($in_dat)){
+      $lampbuttonstates = hexdec(substr(file_get_contents($in_dat),0,2));
+    }
     //file_put_contents(__FILE__.".log","$lampbuttonstates ? $prev_lampbuttonstates\n",FILE_APPEND);
     if($lampbuttonstates != $prev_lampbuttonstates)break; //answer immediately
     usleep(100 * 1000);//wait 100ms
